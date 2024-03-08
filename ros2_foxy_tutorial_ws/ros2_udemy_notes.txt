@@ -1,0 +1,349 @@
+name of the course: ROS2 For Beginners (ROS Foxy, Humble - 2024)
+
+provided by: Edouard Renard
+
+language agnostic -> means you can program in different programming languages python c++
+
+install terminator:
+$ sudo apt install terminator
+
+source env:
+check ros distros in $ cd /opt/ros/
+source the distro
+$ cd foxy
+$ source setup.bash
+
+if you get 
+"ROS_DISTRO was set to 'noetic' before. Please make sure that the environment does not mix paths from different distributions."
+you might try
+unset /opt/ros/noetic/setup.bash
+
+and check
+$ env |grep ROS
+or
+$ printenv | grep -i ROS
+
+source ros2 again
+$ cd /opt/ros/foxy/
+$ source setup.bash
+------------- source 
+
+normally you need to source it every time in new terminal
+to avoid it,
+$ gedit ~/.bashrc
+go to the end and paste: "source /opt/ros/foxy/setup.bash"
+
+------------- communication & rqt
+ROS 2 ROS_DOMAIN_ID -> ROS 2 nodes on the same domain can freely discover and send messages to each other, while ROS 2 nodes on different domains cannot. All ROS 2 nodes use domain ID 0 by default. To avoid interference between different groups of computers running ROS 2 on the same network, a different domain ID should be set for each group.
+
+ROS_LOCALHOST_ONLY -> allows you to limit ROS 2 communication to localhost only. This means your ROS 2 system, and its topics, services, and actions will not be visible to other computers on the local network. where multiple robots may publish to the same topic causing strange behaviors. 
+
+to use several services: $ rqt
+to check the graph: $ rqt_graph
+-------------
+now we instal colcon common exntensions
+$ sudo apt install python3-colcon-common-extensions
+
+-------------
+create a work space
+$ mkdir ros2_ws_tutorials
+
+build it
+$ cd ros2_ws_tutorials
+$ mkdir src
+$ colcon build
+
+to use whatever you created in this workspace, you should source it
+$ cd install
+$ source local_setup.bash
+or
+$ source setup.bash
+difference is the setup.bash is for global
+
+------------- Packages in ROS2
+A package is an organizational unit for your ROS 2 code. If you want to be able to install your code or share it with others, then you’ll need it organized in a package. With packages, you can release your ROS 2 work and allow others to build and use it easily.
+Package creation in ROS 2 uses ament as its build system and colcon as its build tool. You can create a package using either CMake or Python.
+
+create ros2 package python
+$ cd ros2_ws_tutorials/src
+$ ros2 pkg create my_py_pkg --build-type ament_python --dependencies rclpy
+
+to compile package, go to the ros ws, use colcon
+$ cd ..
+$ colcon build
+
+if you want to build only a single package,
+$ colcon build --packages-select my_py_pkg
+
+create ros2 package c++
+$ ros2 pkg create my_cpp_pkg --build-type ament_cmake --dependencies rclcpp
+
+to build it, go to the ros ws, use colcon
+$ cd ..
+$ colcon build
+
+if you get catkin_pkg error,
+File "/opt/ros/foxy/share/ament_cmake_core/cmake/core/package_xml_2_cmake.py", line 21, in <module>
+    from catkin_pkg.package import parse_package_string
+ModuleNotFoundError: No module named 'catkin_pkg'
+solution: $ pip3 install catkin_pkg
+
+if you want to build only a single package,
+$ colcon build --packages-select my_cpp_pkg
+
+
+
+
+------------- Nodes in ROS2
+Each node in ROS should be responsible for a single, modular purpose, e.g. controlling the wheel motors or publishing the sensor data from a laser range-finder. 
+
+Communicate with each other through topics, services and parameters.
+
+Benefits:
+- reduce code complexity
+- fault tolerance 
+	if one node crashes, it will not make other nodes crash
+- language agnostic, 
+	one node in python, another one in c++
+	both nodes can communicate without any problem
+	
+- two nodes cannot have the same name! all nodes must be unique
+
+to create first node, go to the package,
+$ cd ~/ros2_ws_tutorials/src/my_py_pkg/my_py_pkg
+$ touch my_first_node.py
+
+after you create your node, make it executable
+$ chmod +x my_first_node.py
+
+then launch it
+$ ./my_first_node.py
+
+this way of runing the node is not efficient and scalable
+you can install the python file in "setup.py"
+setup.cfg: where you will install the file 
+setup.py: specify a name for the executable 
+edit the setup.py file
+then build the package
+
+$ cd ros2_ws_tutorials
+$ colcon build --packages-select my_py_pkg
+
+now the node is installed, check install folder now
+$ cd install/my_py_pkg/lib/my_py_pkg
+why lib file? because the path is given in setup.cfg
+you may get error, if you get, source the workspace
+$ source ~/.baschrc
+
+in practice, both of these ways to run python node is not used,
+you can use ros2 command line tools
+after you compiled the package and installed the node,
+go another terminal, source the workspace,
+$ source .bashrc
+then run the node
+$ ros2 run my_py_pkg py_node
+
+CPP Node
+
+if the cpp library is not defined in VS Code, you need to press CTRL + Shift + P
+then type C/C++ Edit configuration JSON
+add the path of libraries of ros foxy there, which is 
+/opt/ros/foxy/include/**
+
+you need to compile it after editting
+then install it 
+to do that, use CMakeLists.txt
+this is the part of installation for cpp 
+then build the cpp package
+$ colcon build --packages-select my_cpp_pkg
+then go to where it is installed,
+$ cd /home/onur/ros2_ws_tutorials/install/my_cpp_pkg/lib/my_cpp_pkg
+and run the node
+$ ./cpp_node
+
+to make it easy, go to new terminal, source it,
+$ source .bashrc
+$ ros2 run my_cpp_pkg cpp_node 
+
+to print all the nodes running,
+$ ros2 node list
+to get info about a node, subscribers publishers service clients and action servers,
+$ ros2 node info /node_name
+
+how to launch the same node with different config?
+$ ros2 run my_py_pkg py_node --ros-args --remap __node:=py_node_1
+where py_node_1 is the new name
+for cpp,
+$ ros2 run my_cpp_pkg cpp_node --ros-args -r __node:=cpp_node_1
+where cpp_node_1 is the new name
+
+------------- Colcon
+to build your workspace,
+$ cd ros2_ws/
+$ colcon build
+or you can select a pacakge
+$ colcon build --packages-select my_py_pkg
+
+every time you modify your node, you need to build it again,
+unless you use,
+$ colcon build --packages-select my_py_pkg --symlink-install
+this means instead of launching rosrun, it will create a link to your file,
+useful for debugging and development 
+you use this once, then you can edit your node, then use ros2 run directly.
+Only for python, not for cpp.
+
+but make sure your file is executable!
+$ cd ros2_ws/src/my_py_pkg/my_py_pkg
+$ chmod +x my_first_node.py
+
+------------- Rqt 
+
+start,
+$ rqt
+
+only graph with nodes (node graph),
+$ rqt_graph
+
+------------- Turtlesim
+get a turtle,
+$ ros2 run turtlesim turtlesim_node
+you can also rename this node,
+$ ros2 run turtlesim turtlesim_node --ros-args -r __node:=my_turtle
+
+to control from keyboard,
+$ ros2 run turtlesim turtle_teleop_key
+
+------------- Topics
+
+Each node, which is publishing or subscribing to the topics is totally independent.
+A node can contain multiple publishers, but also subscribers
+A topic is a named bus over which nodes exhange messages
+Unidirectional data stream (publisher/subscriber)
+Publishers and subscribers are anonymous
+A topic has a message type, publisher and subscriber to the topic must use the same message type associated with the topic
+Python, C++, inside ROS nodes
+A node can have many publisgers/subscribers for many topics
+
+to create python publisher,
+go to the same path with the node,
+$ cd ros2_ws/src/my_py_pkg/my_py_pkg,
+$ touch robot_news_station.py
+$ chmod +x robot_news_station.py
+
+
+to check msj types you can have a look at,
+ros2 interface show example_interfaces/msg/String
+it will return the type, string
+and the field, data
+"from example_interfaces.msg import String"
+dont forget to add dependency in package.xml
+
+to list topics,
+$ ros2 topic list
+
+to listen a topic,
+$ ros2 topic echo /robot_news
+
+
+to create python subscriber,
+$ cd ros2_ws/src/my_py_pkg/my_py_pkg
+$ touch phone.py
+$ chmod +x phone.py
+
+to create cpp publisher,
+$ cd ros2_ws/src/my_cpp_pkg/src/
+$ touch robot_news_station.cpp
+start editing your code
+if you use any library, dont forget to include in dependencies, package.xml
+also in CMakeLists.txt, you need to include dependencies and make it executable here
+"add_executable", "ament_target_dependencies", "install"
+ament target dependencies is for defining the libraries you use there
+in install, you need the executable name there
+then, build it,
+$ colcon build --packages-select my_cpp_pkg
+
+to create cpp subscriber,
+$ cd ros2_ws/src/my_cpp_pkg/src/
+$ touch phone.cpp
+
+
+to learn about the topic msg type, #of subscribers and publishers,
+$ ros2 topic info /robot_news
+
+to use echo, listen the topic,
+$ ros2 topic echo /robot_news
+
+to publish from terminal, 10 hz, msg type, message
+$ ros2 topic pub -r 10 /robot_news example_interfaces/msg/String "{data: 'hello from terminal'}"
+
+to learn actual msg definition, you can use the Type in topic info and paste here
+$ ros2 interface show example_interfaces/msg/String
+Now you now what you need to send for this topic
+
+to learn frequency of topic,
+$ ros2 topic hz /robot_news
+to learn band width of topic,
+$ ros2 topic bw /robot_news
+
+how to rename the topic name, remap both node name and topic name,
+$ ros2 run my_py_pkg robot_news_station --ros-args -r __node:=my_station -r robot_news:=my_news
+it is also possible to remap subscribed node at the subscriber side,
+onur@koeken:~$ ros2 run my_py_pkg phone --ros-args -r robot_news:=my_news
+
+
+------------- Services
+Topics are used for data streams, and Services for a client/server interaction.
+
+example use case 1
+Client - Weather service server (cloud)
+think of http:// URL as ros2 service name 
+first send request from client to server, msg location
+server process request and send response, msg weather
+
+you can have multiple clients for this service but only one service and corresponding server
+client and server nodes are not aware of each other, they see ros2 service interface
+
+example use case 2
+controlling LED panel node, it can power on/off
+create a ros2 service, set led
+another node, battery node, check if it is low, client
+if battery is low, it will send request of led_number:6 and state:on
+so service will request to LED panel node, it will turn on the light number 6,
+then send response to Set led service, and it will return Success:true to Battery node client
+
+if battery is high, it will send request of led_number:6 and state:off
+so service will request to LED panel node, it will turn off the light number 6
+then send response to Set led service, and it will return Success:true to Battery node client
+
+* a ros2 service is a client/server system
+* it can be synchronous or asynchronous
+* one msg type for Request, one msg type for Response
+* can be written in python, c++, ... inside ROS nodes
+* a service server can only exist once, but can have many clients
+
+
+to create Python Service Server,
+
+to check one example,
+$ ros2 interface show example_interfaces/srv/AddTwoInts 
+response is below "---", and request is above "---"
+
+to check services,
+$ ros2 service list
+
+to call a service,
+service name, msg type, request
+$ ros2 service call /add_two_ints example_interfaces/srv/AddTwoInts "{a: 48, b: 52}"
+
+------------- General Info - ROS2
+
+imagine you have several ros packages: motion planning pkg, camera pkg, hardware control pkg
+in the camera pkg, you have: camera driver node, image processing node, image enhancement node, etc.
+each node can be launched independently
+then nodes will communicate after launching
+
+
+------------- Remove pkgs
+rm -rf src/package_name
+rm -rf build/ install/ log/
+colcon build
