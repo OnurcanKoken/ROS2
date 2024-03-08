@@ -38,8 +38,6 @@ ROS 2 ROS_DOMAIN_ID -> ROS 2 nodes on the same domain can freely discover and se
 
 ROS_LOCALHOST_ONLY -> allows you to limit ROS 2 communication to localhost only. This means your ROS 2 system, and its topics, services, and actions will not be visible to other computers on the local network. where multiple robots may publish to the same topic causing strange behaviors. 
 
-to use several services: $ rqt
-to check the graph: $ rqt_graph
 -------------
 now we instal colcon common exntensions
 $ sudo apt install python3-colcon-common-extensions
@@ -198,11 +196,18 @@ $ chmod +x my_first_node.py
 
 ------------- Rqt 
 
-start,
+start rqt,
 $ rqt
 
 only graph with nodes (node graph),
 $ rqt_graph
+
+you can check plugins/services/service caller
+and you can pick the service, edit expression, and call it
+below, you will see the response
+
+you can also check the node graph to see nodes and topics
+
 
 ------------- Turtlesim
 get a turtle,
@@ -212,6 +217,22 @@ $ ros2 run turtlesim turtlesim_node --ros-args -r __node:=my_turtle
 
 to control from keyboard,
 $ ros2 run turtlesim turtle_teleop_key
+
+clean traces of the turtle from terminal,
+$ ros2 service call /clear std_srvs/srv/Empty 
+
+spawn a new turtle,
+$ ros2 service call /spawn turtlesim/srv/Spawn "{x: 2.0, y: 3.0 , theta: 11.0, name: 'my_turtle42'}"
+
+first check the type of the service,
+$ ros2 service type /spawn
+it returns "turtlesim/srv/Spawn"
+use it in the following,
+check the interface, request, what you need to give to call it,
+$ ros2 interface show turtlesim/srv/Spawn
+
+to reset number_counter application,
+$ ros2 service call /reset_counter example_interfaces/srv/SetBool "{data: True}"
 
 ------------- Topics
 
@@ -334,6 +355,20 @@ $ ros2 service list
 to call a service,
 service name, msg type, request
 $ ros2 service call /add_two_ints example_interfaces/srv/AddTwoInts "{a: 48, b: 52}"
+
+to create C++ Service Server,
+$ cd Projects/ROS2/ros2_foxy_tutorial_ws/src/my_cpp_pkg_/src/
+$ touch server_name.cpp
+
+test the service from terminal,
+$ ros2 service call /add_two_ints example_interfaces/srv/AddTwoInts "{a: 5, b: 48}"
+
+
+to remap a service at runtime,
+$ ros2 run my_cpp_pkg_ add_two_ints_server --ros-args -r add_two_ints:=new_service_name
+and corresponding client,
+$ ros2 run my_py_pkg add_two_ints_client --ros-args -r add_two_ints:=new_service_name
+
 
 ------------- General Info - ROS2
 
