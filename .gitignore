@@ -1,0 +1,12 @@
+# Colcon output
+ros2_foxy_tutorial_ws/build
+ros2_foxy_tutorial_ws/install
+ros2_foxy_tutorial_ws/log
+
+ros2_foxy_tutorial_ws/src/build
+ros2_foxy_tutorial_ws/src/install
+ros2_foxy_tutorial_ws/src/log
+
+ros2_foxy_tutorial_ws/src/my_py_pkg/my_py_pkg/build
+ros2_foxy_tutorial_ws/src/my_py_pkg/my_py_pkg/install
+ros2_foxy_tutorial_ws/src/my_py_pkg/my_py_pkg/log
