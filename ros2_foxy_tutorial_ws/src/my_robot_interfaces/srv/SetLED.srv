@@ -1,0 +1,5 @@
+# service between Battery node and LED panel node 
+int8 led_number
+int8 state # on -> state true, off -> state false
+---
+bool success  

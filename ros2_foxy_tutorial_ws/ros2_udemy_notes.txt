@@ -369,6 +369,47 @@ $ ros2 run my_cpp_pkg_ add_two_ints_server --ros-args -r add_two_ints:=new_servi
 and corresponding client,
 $ ros2 run my_py_pkg add_two_ints_client --ros-args -r add_two_ints:=new_service_name
 
+--- Debug msg and srv
+
+what data do I need to send?
+$ ros2 interface show message_name
+$ ros2 interface show example_interfaces/msg/String
+$ ros2 interface show my_robot_interfaces/srv/ComputeRectangleArea
+
+ros2 interfaces, messages, services
+$ ros2 interface list
+
+interfaces of a package,
+which messages do I have in a particular interface?
+$ ros2 interface package sensor_msgs
+
+from a publisher node, you can find the name of the topic, name of the interface
+$ ros2 node list
+$ ros2 node info /the_publisher_node
+check "Publishers" section
+
+$ ros2 topic list
+$ ros2 topic info /the_topic_name
+$ ros2 interface show the_message_type
+and you get what you need to send
+
+lets say you have a server, run it first,
+$ ros2 run my_py_pkg add_two_ints_server
+then in another terminal,
+$ ros2 node list
+$ ros2 node info /add_two_ints_server
+check "Service Servers", you see the interface
+$ ros2 service list
+$ ros2 service type /add_two_ints
+you get the name of the interface,
+$ ros2 interface show the_interface_name
+$ ros2 interface show example_interfaces/srv/AddTwoInts
+you get what you need to send/receive
+
+topic is a communication layer,
+interface is what you send and get
+
+
 ------------- Interfaces
 
 ROS2 interfaces are the messages and services you use with your topics and services.
@@ -462,6 +503,49 @@ $ ros2 interface show my_robot_interfaces/msg/HardwareStatus
 to add new msg, you just create in the msg folder,
 then add it in CMakeLists.txt, "rosidl_generate_interfaces(${PROJECT_NAME} "msg/NewName.msg")". and compile, you can use the new msg.
 
+--- use custom msg in a py node 
+
+create a new publisher node,
+from my_robot_interfaces.msg import HardwareStatus
+
+if VScode gives an error, that it cannot find this message,
+you need to add extra path in python auto complete, settings.json 
+
+add dependency in package.xml of my_py_pkg
+the rest is the same with a normal publisher node 
+
+--- use custom msg in a cpp node
+
+similar things with a normal publisher,
+just include the new message,
+#include "my_robot_interfaces/msg/hardware_status.hpp"
+
+if you get error in VSCode, you can include the path of new package of messages
+in .vscode/c_cpp_properties.json, check "includePath"
+
+dont forget to add dependency, find_package(), in CMakeLists.txt
+
+--- custom service
+$ cd ros2_ws/src/my_robot_interfaces
+$ mkdir srv
+$ cd srv
+$ touch ComputeRectangleArea.srv
+
+now edit in VSC
+use primitive data types, float64
+first request
+then "---"
+then response
+
+to build it, in package.xml of my_robot_interfaces should contain the 3 lines to build and execute
+in CMakeLists.txt, check find_package lines, and include in rosidl_generate_interfaces, add new line just like msg,
+"srv/ComputeRectangleArea.srv"
+dont forget that for each .msg and .srv, you need to add a new line here in CMakeLists.txt
+
+then just build it
+
+to check,
+$ ros2 interface show my_robot_interfaces/srv/ComputeRectangleArea 
 
 
 ------------- General Info - ROS2

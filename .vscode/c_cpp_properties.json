@@ -4,7 +4,8 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/opt/ros/foxy/include/**"
+                "/opt/ros/foxy/include/**",
+                "~/Projects/ROS2/ros2_foxy_tutorial_ws/install/my_robot_interfaces/include/**"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",
