@@ -6,6 +6,10 @@ class HardwareStatusPublisherNode : public rclcpp::Node
 public:
     HardwareStatusPublisherNode() : Node("hardware_status_publisher")
     {
+        this->declare_parameter("hw_test_param", 0.0);
+        this->declare_parameter("hw_second_test_param", "hmmm_");
+        this->declare_parameter("hw_third_test_param");
+        
         // topic name, queue size
         publisher_ = this->create_publisher<my_robot_interfaces::msg::HardwareStatus>("hardware_status", 10);
         timer_ = this->create_wall_timer(std::chrono::seconds(1),

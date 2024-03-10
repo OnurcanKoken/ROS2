@@ -547,6 +547,64 @@ then just build it
 to check,
 $ ros2 interface show my_robot_interfaces/srv/ComputeRectangleArea 
 
+------------- Parameters
+
+Parameters will allow you to provide run-time settings for your nodes.
+
+for example, camera package that contains camera driver node, image processing node, etc.
+settings of camera driver node: USB device name, FPS, Simulation mode
+to change these parameters, you need to change it inside the code, recompile if needed
+lets say you want to switch fps from 60 to 30, so you need to change the code
+and you may want to use this node for two different cameras with one of them in simulation mode
+hardcoding these settings is not a great option
+thats why ros2 parameters are used.
+
+A ros2 parameter is a configuration value for a node.
+when you start the node, you set the values 
+no need to compile again, you can remap and use two camera drivers with different parameters
+
+- setting for your nodes, value set at run time
+- a parameter is specific to a node 
+- ros2 parameters: boolean, int, double, strings, lists, etc.
+
+firstly, you should declare parameters within your nodes!
+
+you can run a publisher and a subscriber to test parameters
+$ ros2 param list
+it will return nodes, and for each node parameters 
+you can also check the nodes,
+$ ros2 node list
+
+what are parmeters currently running
+$ ros2 param get /number_publisher use_sim_time
+returns boolean and its value
+
+each parameter is private to the node, they might have the same name for different nodes
+there is no global parameter
+each parameter only exist through the node
+
+how to declare a new parameter?
+edit directly in the code of the node
+from terminal,
+$ ros2 run my_py_pkg number_publisher --ros-args -p test_param:=3
+you can put several other parameters as well, no need to repeat "--ros-args", but repeat "-p"
+$ ros2 run my_py_pkg number_publisher --ros-args -p test_param:=3 -p second_test_param:='interesting'
+
+now if you check ros2 param get /number_publisher test_param
+it will return Integer, so you dont set the type, you can also change "3" with "3.1",
+it will return Double.
+
+if you dont declare in the code, but you try to set it in terminal with --ros-args -p
+it will not give error, but it will also not configure this parameter
+
+to make use of parameters in the code,
+use:
+self.declare_parameter("parameter_name")
+self.get_parameter("parameter_name").value
+BUT, if you use like this, you will get error when you dont enter any param on terminal
+therefore, use default value in the code
+self.declare_parameter("parameter_name", 2)
+
 
 ------------- General Info - ROS2
 
