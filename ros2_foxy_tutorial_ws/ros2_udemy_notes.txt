@@ -369,6 +369,100 @@ $ ros2 run my_cpp_pkg_ add_two_ints_server --ros-args -r add_two_ints:=new_servi
 and corresponding client,
 $ ros2 run my_py_pkg add_two_ints_client --ros-args -r add_two_ints:=new_service_name
 
+------------- Interfaces
+
+ROS2 interfaces are the messages and services you use with your topics and services.
+
+Topic defined by,
+- topic name (ex: /number_count)
+- msg definition (ex: example_interfaces/msg/Int64)
+
+Service defined by,
+- topic name (ex: /reset_number_count)
+- srv definition (ex: example_interfaces/srv/SetBool), request msg and response msg
+
+you can install more interfaces here:
+github-> ro2/common_interfaces
+there are several msgs,
+you can simply install one of them by,
+$ sudo apt install ros-foxy-geometry-msgs 
+to check if it is installed,
+$ dpkg -l | grep ros-foxy-geometry-msgs
+or try to access the files,
+$ ls /opt/ros/foxy/share/geometry_msgs
+
+for example, check sensor_msgs/msg/JointState.msg
+useful to send position, velocity, effort for each joint of the robot
+header comes from std_msgs/Header, its not a primitive data type, another message 
+
+another example, geometry_msgs/msg/Twist.msg
+used in turtlesim to send velocity command
+Vector3 linear, Vector3 angular 
+this is not a primitive data type, already existing message
+if you dont see name of package, it is from this package
+go to geometry_msgs/msg/Vector3.msg
+it contains 3 primitive data types,
+float64 x, float64 y, float64 z
+
+for the srv,
+an example, geometry_msgs/srv/SetCameraInfo.srv
+we have "---" here, it is always the case for .srv file
+first request, then "---", then response
+here request is another message,
+sensor_msgs/CameraInfo camera_info
+you need to check that message to see what to request
+
+you cant include .srv in .srv, only messages
+
+another example, sensor_msgs/msg/CameraInfo.msg
+
+overall,
+- use msg primitive types to create a message definition
+- you can create a message definition using other message definitions
+
+
+---
+
+create a new package to create a custom ros2 message
+$ cd ros_ws/src
+$ ros2 pkg create my_robot_interfaces 
+we dont need rclcpp, rclpy because there will be no code in this package
+$ cd my_robot_interfaces
+
+if you dont specify a build type, it will use cpp package as default
+remove include and src
+$ rm -rf include/
+$ rm -rf src/
+$ mkdir msg
+
+if you check package.xml,
+build type ament_cmake,
+add depend lines,
+edit CMakeLists.txt, dependencies, find_package()
+check the file for details
+
+create a message,
+use Uppercase for each word, dont use dash or dont include msg in the msg name,
+$ touch HardwareStatus.msg
+then just add primitive data types
+
+then compile,
+$ cd ros2_ws
+$ colcon build --packages-select my_robot_interfaces
+
+in ros2 foxy, you can find the installed msg here:
+/ros2_foxy_tutorial_ws/install/my_robot_interfaces/lib/python3.8/site-packages/my_robot_interfaces/msg 
+in ros2 humble, its in ...my_robot_interfaces/local/lib/python3.8/dist-packages/...
+to find the .hpp file,
+/ros2_foxy_tutorial_ws/install/my_robot_interfaces/include/my_robot_interfaces/msg/
+
+to check if ros2 custom interface is created successfully 
+$ ros2 interface show my_robot_interfaces/msg/HardwareStatus 
+
+to add new msg, you just create in the msg folder,
+then add it in CMakeLists.txt, "rosidl_generate_interfaces(${PROJECT_NAME} "msg/NewName.msg")". and compile, you can use the new msg.
+
+
 
 ------------- General Info - ROS2
 
@@ -382,3 +476,36 @@ then nodes will communicate after launching
 rm -rf src/package_name
 rm -rf build/ install/ log/
 colcon build
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
