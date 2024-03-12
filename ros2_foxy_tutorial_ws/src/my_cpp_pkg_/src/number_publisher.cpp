@@ -4,12 +4,16 @@
 class NumberPublisherNode : public rclcpp::Node
 {
 public:
-    NumberPublisherNode() : Node("number_publisher"), number_(2)
+    NumberPublisherNode() : Node("number_publisher")
     {
-        this->declare_parameter("name");
+        this->declare_parameter("number_to_publish", 2);
+        this->declare_parameter("publish_frq", 1.0);
+        // type is not dynamic this time, it is int, in py its dynamic
+        number_ = this->get_parameter("number_to_publish").as_int();
+        publish_frq = this->get_parameter("publish_frq").as_double();
 
         publisher_ = this->create_publisher<example_interfaces::msg::Int64>("number", 10);
-        timer_ = this->create_wall_timer(std::chrono::seconds(1),
+        timer_ = this->create_wall_timer(std::chrono::milliseconds((int)(1000.0/publish_frq)),
                                          std::bind(&NumberPublisherNode::publishNumber, this));
         RCLCPP_INFO(this->get_logger(), "Number publisher has been started.");
     }
@@ -23,6 +27,7 @@ private:
     }
 
     int number_;
+    double publish_frq;
     rclcpp::Publisher<example_interfaces::msg::Int64>::SharedPtr publisher_;
     rclcpp::TimerBase::SharedPtr timer_;
 };

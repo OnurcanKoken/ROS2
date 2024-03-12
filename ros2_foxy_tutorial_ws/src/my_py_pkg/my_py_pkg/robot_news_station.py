@@ -8,7 +8,9 @@ class RobotNewsStationNode(Node):
     def __init__(self):
         super().__init__("robot_news_station") 
         
-        self.robot_name_ = "286"
+        # self.robot_name_ = "286"
+        self.declare_parameter("robot_name", "286")
+        self.robot_name_ = self.get_parameter("robot_name").value
         # robot_news is the topic
         # 10, queue size, is like a buffer, it keeps some messages before it is processed,
         #   if some messages are late, up to 10 messages will be kept, but then messages will be lost

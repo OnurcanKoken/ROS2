@@ -9,7 +9,11 @@ from my_robot_interfaces.msg import StateLED
 class LEDPanelServerNode(Node):
     def __init__(self):
         super().__init__("led_panel_server") 
-        self.led_status = [0, 0, 0]
+        #self.led_status = [0, 0, 0]
+        
+        self.declare_parameter("led_states", [0,0,0])
+        self.led_status = self.get_parameter("led_states").value
+
         # service type, name of service, callback func
         self.publisher_ = self.create_publisher(StateLED, "led_panel_state", 10)
         self.update_ = self.create_timer(4, self.update_publish_led_state)

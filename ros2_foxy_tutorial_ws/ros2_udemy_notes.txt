@@ -34,9 +34,16 @@ $ gedit ~/.bashrc
 go to the end and paste: "source /opt/ros/foxy/setup.bash"
 
 ------------- communication & rqt
-ROS 2 ROS_DOMAIN_ID -> ROS 2 nodes on the same domain can freely discover and send messages to each other, while ROS 2 nodes on different domains cannot. All ROS 2 nodes use domain ID 0 by default. To avoid interference between different groups of computers running ROS 2 on the same network, a different domain ID should be set for each group.
+ROS 2 ROS_DOMAIN_ID -> ROS 2 nodes on the same domain can freely discover and 
+send messages to each other, while ROS 2 nodes on different domains cannot. 
+All ROS 2 nodes use domain ID 0 by default. To avoid interference between different 
+groups of computers running ROS 2 on the same network, 
+a different domain ID should be set for each group.
 
-ROS_LOCALHOST_ONLY -> allows you to limit ROS 2 communication to localhost only. This means your ROS 2 system, and its topics, services, and actions will not be visible to other computers on the local network. where multiple robots may publish to the same topic causing strange behaviors. 
+ROS_LOCALHOST_ONLY -> allows you to limit ROS 2 communication to localhost only. 
+This means your ROS 2 system, and its topics, services, and actions will not be visible 
+to other computers on the local network. where multiple robots may publish 
+to the same topic causing strange behaviors. 
 
 -------------
 now we instal colcon common exntensions
@@ -59,8 +66,13 @@ $ source setup.bash
 difference is the setup.bash is for global
 
 ------------- Packages in ROS2
-A package is an organizational unit for your ROS 2 code. If you want to be able to install your code or share it with others, then you’ll need it organized in a package. With packages, you can release your ROS 2 work and allow others to build and use it easily.
-Package creation in ROS 2 uses ament as its build system and colcon as its build tool. You can create a package using either CMake or Python.
+A package is an organizational unit for your ROS 2 code. 
+If you want to be able to install your code or share it with others, 
+then you’ll need it organized in a package. With packages, 
+you can release your ROS 2 work and allow others to build and use it easily.
+
+Package creation in ROS 2 uses ament as its build system and colcon as its build tool. 
+You can create a package using either CMake or Python.
 
 create ros2 package python
 $ cd ros2_ws_tutorials/src
@@ -93,7 +105,8 @@ $ colcon build --packages-select my_cpp_pkg
 
 
 ------------- Nodes in ROS2
-Each node in ROS should be responsible for a single, modular purpose, e.g. controlling the wheel motors or publishing the sensor data from a laser range-finder. 
+Each node in ROS should be responsible for a single, modular purpose, e.g. 
+controlling the wheel motors or publishing the sensor data from a laser range-finder. 
 
 Communicate with each other through topics, services and parameters.
 
@@ -241,7 +254,8 @@ A node can contain multiple publishers, but also subscribers
 A topic is a named bus over which nodes exhange messages
 Unidirectional data stream (publisher/subscriber)
 Publishers and subscribers are anonymous
-A topic has a message type, publisher and subscriber to the topic must use the same message type associated with the topic
+A topic has a message type, publisher and subscriber to the topic must use the same 
+message type associated with the topic
 Python, C++, inside ROS nodes
 A node can have many publisgers/subscribers for many topics
 
@@ -537,8 +551,10 @@ first request
 then "---"
 then response
 
-to build it, in package.xml of my_robot_interfaces should contain the 3 lines to build and execute
-in CMakeLists.txt, check find_package lines, and include in rosidl_generate_interfaces, add new line just like msg,
+to build it, in package.xml of my_robot_interfaces should contain 
+the 3 lines to build and execute.
+in CMakeLists.txt, check find_package lines, and include in rosidl_generate_interfaces, 
+add new line just like msg,
 "srv/ComputeRectangleArea.srv"
 dont forget that for each .msg and .srv, you need to add a new line here in CMakeLists.txt
 
@@ -604,6 +620,64 @@ self.get_parameter("parameter_name").value
 BUT, if you use like this, you will get error when you dont enter any param on terminal
 therefore, use default value in the code
 self.declare_parameter("parameter_name", 2)
+
+for cpp, be careful about the types int double string
+because when you are setting the values from terminal, 6 is int and 6.0 is double
+so check the casting type in the code 
+for py, its dynamicly set by ".value"
+
+one example for cpp from terminal,
+$ ros2 run my_cpp_pkg_ number_publisher --ros-args -p publish_frq:=6.0 -p number_to_publish:=5
+
+you can now create the same two nodes with two different parameters,
+for example,
+$ ros2 run my_py_pkg robot_news_station --ros-args -r __node:=second_news_station -p robot_name:=second_robot
+
+- Don’t forget to declare any parameter before you even try to use it 
+- When you run your node, set values for your parameters
+- In your node’s code, get the parameters’ values and use them. 
+You can also define default values (best practice to avoid errors at run-time).
+
+------------- Launch file
+
+What if I have to run multiple nodes, each with multiple parameters? 
+It would quickly become really long (and error prone) to always start 
+everything from the terminal.
+
+Imagine you have to start 10 nodes, each with a different configuration. 
+Using the terminal is not something that scales well.
+
+put launch files in a package to make it easy to use many other packages,
+just like interfaces. 
+
+$ ros2 pkg create my_robot_bringup
+$ cd my_robot_bringup
+$ rm -rf include/
+$ rm -rf src/
+$ mkdir launch
+
+configure package.xml and CMakeLists.txt
+execution dependencies should be in the package.xml, 
+<exec_depend>my_py_pkg</exec_depend>
+and in CMakeLists.txt,
+
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
+then create a launch file,
+$ cd launch
+$ touch number_app.launch.py
+$ chmod +x number_app.launch.py
+
+build it simply,
+$ colcon build --packages-select my_robot_bringup --symlink-install
+
+to run a launch file,
+$ ros2 launch my_robot_bringup number_app.launch.py 
+
+
 
 
 ------------- General Info - ROS2
