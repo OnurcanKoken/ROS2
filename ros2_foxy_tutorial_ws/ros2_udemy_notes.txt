@@ -313,7 +313,7 @@ $ ros2 topic pub -r 10 /robot_news example_interfaces/msg/String "{data: 'hello 
 
 to learn actual msg definition, you can use the Type in topic info and paste here
 $ ros2 interface show example_interfaces/msg/String
-Now you now what you need to send for this topic
+Now you know what you need to send for this topic
 
 to learn frequency of topic,
 $ ros2 topic hz /robot_news
@@ -367,6 +367,7 @@ to check services,
 $ ros2 service list
 
 to call a service,
+$ ros2 service type /service_name
 service name, msg type, request
 $ ros2 service call /add_two_ints example_interfaces/srv/AddTwoInts "{a: 48, b: 52}"
 
@@ -475,6 +476,13 @@ overall,
 - use msg primitive types to create a message definition
 - you can create a message definition using other message definitions
 
+
+$ ros2 service list
+$ ros2 service type /service_name
+$ ros2 interface show service_type
+for example
+$ ros2 service type /kill
+$ ros2 interface show turtlesim/srv/Kill
 
 ---
 
@@ -677,7 +685,11 @@ $ colcon build --packages-select my_robot_bringup --symlink-install
 to run a launch file,
 $ ros2 launch my_robot_bringup number_app.launch.py 
 
-
+Setup for launch files:
+- Create a new package <robot_name>_bringup (best practice).
+- Create a launch/ folder at the root of the package.
+- Configure CMakeLists.txt to install files from this launch/ folder.
+- Create any number of files you want inside the launch/ folder, ending with .launch.py.
 
 
 ------------- General Info - ROS2
@@ -692,28 +704,6 @@ then nodes will communicate after launching
 rm -rf src/package_name
 rm -rf build/ install/ log/
 colcon build
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
