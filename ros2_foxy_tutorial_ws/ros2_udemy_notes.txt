@@ -691,6 +691,32 @@ Setup for launch files:
 - Configure CMakeLists.txt to install files from this launch/ folder.
 - Create any number of files you want inside the launch/ folder, ending with .launch.py.
 
+------------- ros bags
+
+at first, use a publisher node to record some data,
+for example,
+$ ros2 run my_py_pkg number_publisher
+
+$ ros2 bag record /topic_name
+
+for database,
+$ ros2 bag record /topic_name -o test_file_name
+
+$ ros2 bag info test_file_name/
+
+now dont use any publsher, use only the bag file
+
+$ ros2 bag play test_file_name
+
+now you can list topics and use echo to see the records
+$ ros2 topic echo /topic_name
+
+you can also record two topics,
+$ ros2 bag record /topic_name_1 /topic_name_2 -o test_file_name_2
+
+to record all topics,
+$ ros2 bag record -a -o test_file_name_3
+
 
 ------------- General Info - ROS2
 
